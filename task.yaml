@@ -1,0 +1,36 @@
+context: |
+  A team wants to enforce secure, passwordless SSH login between two Linux servers:
+  `client` and `server`. Both run inside this container environment.
+
+  The user `devops` already exists on both systems. Currently, the server accepts only
+  password-based login. Your task is to configure SSH key-based authentication so
+  that `devops@client` can log into `devops@server` without a password.
+
+objectives:
+  - Generate an SSH key pair for the `devops` user on `client`.
+  - Install the public key on the `server` under `/home/devops/.ssh/authorized_keys`.
+  - Ensure correct permissions on `.ssh` (700) and `authorized_keys` (600).
+  - Configure `/etc/ssh/sshd_config` on the `server` to allow key-based login
+    and disable password authentication.
+  - Verify that `ssh devops@server` from `client` works without asking for a password.
+
+constraints:
+  tools_allowed: [ssh, ssh-keygen, scp, cat, chmod, chown, systemctl, service]
+  max_agent_timeout_sec: 300
+  max_test_timeout_sec: 30
+
+acceptance_criteria:
+  - "Client has generated an SSH key pair in `/home/devops/.ssh/id_rsa` and `/home/devops/.ssh/id_rsa.pub`."
+  - "Server contains the client's public key in `/home/devops/.ssh/authorized_keys`."
+  - "Permissions: `.ssh` is 700, `authorized_keys` is 600, owned by `devops`."
+  - "Server's `/etc/ssh/sshd_config` contains `PubkeyAuthentication yes`."
+  - "Server's `/etc/ssh/sshd_config` contains `PasswordAuthentication no`."
+  - "`ssh devops@server` from `client` logs in without prompting for a password."
+
+inputs_materials:
+  - "Two containers: `client` and `server`, both running Ubuntu."
+  - "User `devops` pre-created on both with password login enabled initially."
+  - "SSH server running on `server`."
+
+outputs:
+  - "Successful SSH login from client → server without password."
